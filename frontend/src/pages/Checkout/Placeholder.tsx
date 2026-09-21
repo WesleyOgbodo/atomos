@@ -1,0 +1,1 @@
+export function Placeholder({ title, text }: { title: string; text: string }) { return <main className="mx-auto max-w-4xl px-5 py-24 text-center"><p className="text-xs font-bold uppercase tracking-widest text-red-600">Atomos</p><h1 className="mt-3 text-4xl font-black">{title}</h1><p className="mx-auto mt-4 max-w-xl text-gray-500">{text}</p></main> }
