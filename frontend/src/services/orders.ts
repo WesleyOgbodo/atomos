@@ -40,7 +40,8 @@ export type SellerOrder = {
   buyer_id: string
   buyer_name: string
   buyer_phone: string
-  status: OrderStatus
+  global_status: OrderStatus
+  seller_status: OrderStatus
   subtotal: number
   delivery_fee: number
   total: number
@@ -150,7 +151,8 @@ export async function getSellerOrders(): Promise<SellerOrder[]> {
       buyer_id: String(row.buyer_id),
       buyer_name: String(row.buyer_name ?? ''),
       buyer_phone: String(row.buyer_phone ?? ''),
-      status: row.status as OrderStatus,
+      global_status: row.global_status as OrderStatus,
+      seller_status: row.seller_status as OrderStatus,
       subtotal: Number(row.subtotal),
       delivery_fee: Number(row.delivery_fee),
       total: Number(row.total),
@@ -162,6 +164,11 @@ export async function getSellerOrders(): Promise<SellerOrder[]> {
   }
 
   return [...grouped.values()]
+}
+
+export async function getSellerOrder(orderId: string): Promise<SellerOrder | null> {
+  const orders = await getSellerOrders()
+  return orders.find(order => order.order_id === orderId) ?? null
 }
 
 export async function updateSellerOrderStatus(orderId: string, status: OrderStatus) {

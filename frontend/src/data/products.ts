@@ -1,8 +1,8 @@
-import type { Product, ProductBrand, ProductCategory } from '@/types/product'
+import type { Product } from '@/types/product'
 
 type LiveListingSeed = Omit<
   Product,
-  'id' | 'rating' | 'reviewsCount' | 'sizes' | 'colors' | 'stock' | 'isNew' | 'isBestSeller' | 'photoType'
+  'id' | 'rating' | 'reviewsCount' | 'stock' | 'isNew' | 'isBestSeller' | 'photoType'
 >
 
   // This file intentionally contains ONLY verified live listings; no estimated prices or generated variants.

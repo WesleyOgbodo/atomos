@@ -14,6 +14,8 @@ import { Placeholder } from '@/pages/Checkout/Placeholder'
 import { Orders } from '@/pages/Orders/Orders'
 import { OrderDetails } from '@/pages/Orders/OrderDetails'
 import { SellerOrders } from '@/pages/Orders/SellerOrders'
+import { Notifications } from '@/pages/Orders/Notifications'
+import { SellerOrderDetails } from '@/pages/Orders/SellerOrderDetails'
 import { ProductDetails } from '@/pages/Product/ProductDetails'
 import { Register } from '@/pages/Account/Register'
 import { ResetPassword } from '@/pages/Account/ResetPassword'
@@ -53,6 +55,7 @@ export function AppRoutes() {
           <Route path="/sell" element={<CreateListing />} />
           <Route path="/account/listings" element={<SellerListings />} />
           <Route path="/seller/orders" element={<SellerOrders />} />
+          <Route path="/seller/orders/:orderId" element={<SellerOrderDetails />} />
         </Route>
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
@@ -60,6 +63,7 @@ export function AppRoutes() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:orderId" element={<OrderDetails />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/wishlist" element={<Placeholder title="Wishlist" text="Your saved products will appear here once wishlist persistence is connected to Supabase." />} />
       </Route>
       <Route path="*" element={<NotFound />} />

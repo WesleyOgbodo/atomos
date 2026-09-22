@@ -45,8 +45,9 @@ function mapBrand(name: string | undefined): Product['brand'] {
 }
 
 async function toProduct(listing: LiveListing): Promise<Product | null> {
-  const photos = [...(listing.listing_photos ?? [])].sort((a, b) => a.sort_order - b.sort_order)
-  const mainPhoto = photos[0]
+  const photos = [...(listing.listing_photos ?? [])].sort(
+  (a, b) => a.sort_order - b.sort_order,
+)
 
   let imageUrl = '/atomos-mark.svg'
   const imageUrls: string[] = []

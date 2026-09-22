@@ -13,7 +13,7 @@ export function Listing({ category }: { category?: ProductCategory }) {
   const [sort, setSort] = useState<'newest' | 'oldest' | 'price-low' | 'price-high' | 'views'>('newest')
 
   const filters = useMemo(() => ({
-    category: category ?? 'All',
+  category: category ?? ('All' as const),
     condition,
     brand,
     minPrice: minPrice === 'any' ? undefined : Number(minPrice),

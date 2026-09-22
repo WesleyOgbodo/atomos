@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ArrowLeft, MapPin, Store } from 'lucide-react'
 import { formatNaira } from '@/lib/format'
 import { getMyCart, type CartProductItem } from '@/services/cart'
@@ -9,7 +9,6 @@ import { initializeOrderPayment } from '@/services/payments'
 const DELIVERY_FEE = 2000
 
 export function Checkout() {
-  const navigate = useNavigate()
   const [items, setItems] = useState<CartProductItem[]>([])
   const [method, setMethod] = useState<DeliveryMethod>('pickup')
   const [address, setAddress] = useState('')

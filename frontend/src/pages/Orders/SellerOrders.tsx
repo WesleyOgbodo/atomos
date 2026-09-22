@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { formatNaira } from '@/lib/format'
 import { getSellerOrders, updateSellerOrderStatus, type OrderStatus, type SellerOrder } from '@/services/orders'
@@ -9,6 +10,15 @@ const nextStatus: Partial<Record<OrderStatus, OrderStatus>> = {
   confirmed: 'processing',
   processing: 'ready_for_delivery',
   ready_for_delivery: 'delivered',
+}
+
+const statusClasses: Record<OrderStatus, string> = {
+  pending: 'bg-amber-50 text-amber-700',
+  confirmed: 'bg-blue-50 text-blue-700',
+  processing: 'bg-indigo-50 text-indigo-700',
+  ready_for_delivery: 'bg-violet-50 text-violet-700',
+  delivered: 'bg-emerald-50 text-emerald-700',
+  cancelled: 'bg-red-50 text-red-700',
 }
 
 export function SellerOrders() {
@@ -32,7 +42,7 @@ export function SellerOrders() {
   useEffect(() => { void load() }, [load])
 
   async function changeStatus(order: SellerOrder, status: OrderStatus) {
-    if (!window.confirm(`Change ${order.order_number} to ${statusLabel(status)}?`)) return
+    if (!window.confirm(`Change your part of ${order.order_number} to ${statusLabel(status)}?`)) return
     setUpdating(order.order_id)
     setError('')
     try {
@@ -51,19 +61,19 @@ export function SellerOrders() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">Seller area</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight">Orders</h1>
-          <p className="mt-2 text-sm text-slate-500">Orders containing your listings only.</p>
+          <p className="mt-2 text-sm text-slate-500">Only orders containing your listings are shown. Your status is separate from other sellers.</p>
         </div>
         <button type="button" onClick={() => void load()} disabled={loading} className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-50"><RefreshCw size={16} /> Refresh</button>
       </div>
 
       {error && <p className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
       {loading && <p className="mt-10 text-sm font-semibold text-slate-500">Loading seller orders…</p>}
-      {!loading && !error && !orders.length && <div className="mt-10 rounded-2xl border border-dashed border-slate-300 p-10 text-center"><h2 className="text-xl font-black">No seller orders yet</h2><p className="mt-2 text-sm text-slate-500">Orders containing your active listings will appear here.</p></div>}
+      {!loading && !error && !orders.length && <div className="mt-10 rounded-2xl border border-dashed border-slate-300 p-10 text-center"><h2 className="text-xl font-black">No seller orders yet</h2><p className="mt-2 text-sm text-slate-500">Paid orders containing your listings will appear here.</p></div>}
 
       <div className="mt-8 space-y-5">
         {orders.map(order => {
-          const next = nextStatus[order.status]
-          const canCancel = order.status === 'pending' || order.status === 'confirmed'
+          const next = nextStatus[order.seller_status]
+          const canCancel = order.seller_status === 'pending' || order.seller_status === 'confirmed'
           return (
             <article key={order.order_id} className="rounded-2xl border border-slate-200 p-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -71,7 +81,10 @@ export function SellerOrders() {
                   <p className="font-black">{order.order_number}</p>
                   <p className="mt-1 text-sm text-slate-500">{new Date(order.created_at).toLocaleString('en-NG')}</p>
                 </div>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold capitalize">{statusLabel(order.status)}</span>
+                <div className="flex flex-wrap gap-2 text-xs font-bold">
+                  <span className={`rounded-full px-3 py-1 capitalize ${statusClasses[order.seller_status]}`}>Your status: {statusLabel(order.seller_status)}</span>
+                  <span className={`rounded-full px-3 py-1 capitalize ${statusClasses[order.global_status]}`}>Order: {statusLabel(order.global_status)}</span>
+                </div>
               </div>
 
               <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_300px]">
@@ -98,6 +111,7 @@ export function SellerOrders() {
                 {next && <button type="button" onClick={() => void changeStatus(order, next)} disabled={updating === order.order_id} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{updating === order.order_id ? 'Updating…' : `Mark ${statusLabel(next)}`}</button>}
                 {canCancel && <button type="button" onClick={() => void changeStatus(order, 'cancelled')} disabled={updating === order.order_id} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50">Cancel order</button>}
                 {!next && !canCancel && <p className="text-sm font-semibold text-slate-500">No further seller action is available for this status.</p>}
+                <Link to={`/seller/orders/${order.order_id}`} className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">View seller order</Link>
               </div>
             </article>
           )

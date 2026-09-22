@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Menu, Search, ShoppingBag, UserRound, Heart, X, MessageCircle } from 'lucide-react'
+import { Menu, Search, ShoppingBag, UserRound, Heart, X, MessageCircle, Bell } from 'lucide-react'
 import { Logo } from '@/components/layout/Logo'
 
 const nav = [['Phones','/phones'],['Laptops','/laptops'],['Accessories','/accessories'],['Fashion','/fashion'],['Deals','/featured']]
@@ -16,7 +16,7 @@ export function Header() {
         <Link to="/search" aria-label="Search"><Search size={20}/></Link>
         <Link to="/wishlist" className="hidden sm:block" aria-label="Wishlist"><Heart size={20}/></Link>
         <Link to="/account" className="hidden sm:block" aria-label="Account"><UserRound size={20}/></Link>
-        <Link to="/messages" aria-label="Messages"><MessageCircle size={20}/></Link><Link to="/cart" aria-label="Cart"><ShoppingBag size={20}/></Link>
+        <Link to="/messages" aria-label="Messages"><MessageCircle size={20}/></Link><Link to="/notifications" aria-label="Notifications"><Bell size={20}/></Link><Link to="/cart" aria-label="Cart"><ShoppingBag size={20}/></Link>
       </div>
     </div>
     {open && <nav className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">{nav.map(([label,path]) => <NavLink onClick={() => setOpen(false)} key={path} to={path} className="block border-b border-slate-100 py-3 text-sm font-semibold">{label}</NavLink>)}<NavLink onClick={() => setOpen(false)} to="/search" className="block py-3 text-sm font-semibold">Search everything</NavLink></nav>}

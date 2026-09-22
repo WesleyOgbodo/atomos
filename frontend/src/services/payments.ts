@@ -22,9 +22,33 @@ export async function verifyPaystackPayment(reference: string) {
     body: { reference },
   })
 
-  if (error) throw error
-  if (!data) throw new Error('Payment verification returned no result.')
-  return data as { orderId: string; reference: string; status: string; paid: boolean }
+  if (error) {
+    if ('context' in error && error.context instanceof Response) {
+      let details = ''
+
+      try {
+        const body = await error.context.json()
+        details = body?.error ? ` ${body.error}` : ''
+      } catch {
+        // Keep the original error when the response is not JSON.
+      }
+
+      throw new Error(`${error.message}.${details}`)
+    }
+
+    throw error
+  }
+
+  if (!data) {
+    throw new Error('Payment verification returned no result.')
+  }
+
+  return data as {
+    orderId: string
+    reference: string
+    status: string
+    paid: boolean
+  }
 }
 
 export async function markOrderPaymentAbandoned(orderId: string) {
