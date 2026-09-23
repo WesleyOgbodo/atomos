@@ -23,6 +23,10 @@ export function ProductCard({ product }: ProductCardProps) {
       <button
         type="button"
         aria-label={`Add ${product.name} to wishlist`}
+        onClick={event => {
+          event.preventDefault()
+          event.stopPropagation()
+        }}
         className="absolute right-3 top-3 rounded-full bg-white/95 p-2 shadow-sm transition hover:text-blue-600"
       >
         <Heart size={16} />

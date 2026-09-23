@@ -181,23 +181,35 @@ export function ProductDetails() {
             </Link>
 
             <button
-              disabled={addingToCart || product.photoType !== 'seller'}
+              disabled={addingToCart}
               onClick={async () => {
                 if (!user) return
+
                 setAddingToCart(true)
                 setCartError('')
+
                 try {
                   await addToCart(product.id, qty)
                   setAdded(true)
                 } catch (error) {
-                  setCartError(error instanceof Error ? error.message : 'Could not add this item to your cart.')
+                  setCartError(
+                    error instanceof Error
+                      ? error.message
+                      : 'Could not add this item to your cart.',
+                  )
                 } finally {
                   setAddingToCart(false)
                 }
               }}
               className="flex-1 rounded-xl bg-blue-600 px-6 py-3.5 font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {!user ? 'Sign in to add' : product.photoType !== 'seller' ? 'Demo item' : addingToCart ? 'Adding…' : added ? 'Added to cart' : 'Add to cart'}
+              {!user
+                ? 'Sign in to add'
+                : addingToCart
+                  ? 'Adding…'
+                  : added
+                    ? 'Added to cart'
+                    : 'Add to cart'}
             </button>
 
             <button
@@ -220,8 +232,8 @@ export function ProductDetails() {
           )}
 
           <p className="mt-6 text-sm text-slate-500">
-            {product.stock} available · {product.condition} · Free delivery
-            options at checkout.
+            {product.stock} available · {product.condition} · Pickup is free;
+            delivery is available for ₦2,000 at checkout.
           </p>
         </div>
       </div>

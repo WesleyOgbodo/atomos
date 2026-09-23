@@ -1,4 +1,3 @@
-import { products as demoProducts } from '@/data/products'
 import { supabase } from '@/lib/supabase'
 import type { Product } from '@/types/product'
 
@@ -10,6 +9,7 @@ const LIVE_LISTING_SELECT = `
   condition,
   location,
   stock,
+  view_count,
   created_at,
   categories (name, slug),
   brands (name, slug),
@@ -24,6 +24,7 @@ type LiveListing = {
   condition: 'brand_new' | 'used'
   location: string
   stock: number
+  view_count: number
   created_at: string
   categories: { name: string; slug: string } | null
   brands: { name: string; slug: string } | null
@@ -35,19 +36,40 @@ function mapCondition(condition: LiveListing['condition']): Product['condition']
 }
 
 function mapCategory(name: string | undefined): Product['category'] {
-  const allowed: Product['category'][] = ['Phones', 'Laptops', 'Audio', 'Accessories', 'Fashion', 'Shoes', 'Other']
-  return allowed.includes(name as Product['category']) ? (name as Product['category']) : 'Other'
+  const allowed: Product['category'][] = [
+    'Phones',
+    'Laptops',
+    'Audio',
+    'Accessories',
+    'Fashion',
+    'Shoes',
+    'Other',
+  ]
+
+  return allowed.includes(name as Product['category'])
+    ? (name as Product['category'])
+    : 'Other'
 }
 
 function mapBrand(name: string | undefined): Product['brand'] {
-  const allowed: Product['brand'][] = ['Apple', 'Samsung', 'Xiaomi', 'Infinix', 'Oppo', 'Other']
-  return allowed.includes(name as Product['brand']) ? (name as Product['brand']) : 'Other'
+  const allowed: Product['brand'][] = [
+    'Apple',
+    'Samsung',
+    'Xiaomi',
+    'Infinix',
+    'Oppo',
+    'Other',
+  ]
+
+  return allowed.includes(name as Product['brand'])
+    ? (name as Product['brand'])
+    : 'Other'
 }
 
-async function toProduct(listing: LiveListing): Promise<Product | null> {
+async function toProduct(listing: LiveListing): Promise<Product> {
   const photos = [...(listing.listing_photos ?? [])].sort(
-  (a, b) => a.sort_order - b.sort_order,
-)
+    (a, b) => a.sort_order - b.sort_order,
+  )
 
   let imageUrl = '/atomos-mark.svg'
   const imageUrls: string[] = []
@@ -60,11 +82,16 @@ async function toProduct(listing: LiveListing): Promise<Product | null> {
     if (!error && data?.signedUrl) {
       imageUrls.push(data.signedUrl)
     } else {
-      console.warn('Could not create a signed listing-photo URL:', error)
+      console.warn(
+        'Could not create a signed listing-photo URL:',
+        error,
+      )
     }
   }
 
-  if (imageUrls.length > 0) imageUrl = imageUrls[0]
+  if (imageUrls.length > 0) {
+    imageUrl = imageUrls[0]
+  }
 
   return {
     id: listing.id,
@@ -85,7 +112,8 @@ async function toProduct(listing: LiveListing): Promise<Product | null> {
     stock: listing.stock,
     isNew: true,
     isBestSeller: false,
-    badge: 'New listing',
+    viewCount: Number(listing.view_count ?? 0),
+    badge: listing.condition === 'used' ? 'Used' : 'New listing',
   }
 }
 
@@ -99,43 +127,43 @@ export async function getLiveProducts(): Promise<Product[]> {
 
   if (error) throw error
 
-  const mapped = await Promise.all((data ?? []).map(listing => toProduct(listing as unknown as LiveListing)))
-  return mapped.filter((product): product is Product => product !== null)
+  const mapped = await Promise.all(
+    (data ?? []).map(listing =>
+      toProduct(listing as unknown as LiveListing),
+    ),
+  )
+
+  return mapped
 }
 
 export async function getProducts(): Promise<Product[]> {
-  try {
-    const liveProducts = await getLiveProducts()
-    return [...liveProducts, ...demoProducts]
-  } catch (error) {
-    console.error('Could not load live Atomos listings:', error)
-    return demoProducts
-  }
+  return getLiveProducts()
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
-  const demoProduct = demoProducts.find(product => product.id === id)
+export async function getProductById(
+  id: string,
+): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from('listings')
+    .select(LIVE_LISTING_SELECT)
+    .eq('id', id)
+    .eq('status', 'active')
+    .gt('stock', 0)
+    .maybeSingle()
 
-  try {
-    const { data, error } = await supabase
-      .from('listings')
-      .select(LIVE_LISTING_SELECT)
-      .eq('id', id)
-      .eq('status', 'active')
-      .maybeSingle()
+  if (error) throw error
+  if (!data) return null
 
-    if (!error && data) {
-      const liveProduct = await toProduct(data as unknown as LiveListing)
-      if (liveProduct) return liveProduct
-    }
-  } catch (error) {
-    console.error('Could not load listing:', error)
-  }
-
-  return demoProduct ?? null
+  return toProduct(data as unknown as LiveListing)
 }
 
-export async function getProductsByCategory(category: string): Promise<Product[]> {
-  const allProducts = await getProducts()
-  return allProducts.filter(product => product.category.toLowerCase() === category.toLowerCase())
+export async function getProductsByCategory(
+  category: string,
+): Promise<Product[]> {
+  const allProducts = await getLiveProducts()
+
+  return allProducts.filter(
+    product =>
+      product.category.toLowerCase() === category.toLowerCase(),
+  )
 }
